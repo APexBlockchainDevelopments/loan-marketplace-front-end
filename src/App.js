@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
 import Home from './components/Home';
 import Lender from './components/Lender';
 import Borrower from './components/Borrower';
-import Admin from './components/Admin'; // Import the Admin component
+import Admin from './components/Admin'; 
 
 function App() {
   return (
@@ -14,7 +14,7 @@ function App() {
             <li><Link to="/">Home</Link></li>
             <li><Link to="/lender">Lender</Link></li>
             <li><Link to="/borrower">Borrower</Link></li>
-            <li><Link to="/admin">Admin</Link></li> {/* Add link to Admin */}
+            <li><Link to="/admin">Admin</Link></li> 
           </ul>
         </nav>
         <Switch>
@@ -25,9 +25,12 @@ function App() {
             <Borrower />
           </Route>
           <Route path="/admin">
-            <Admin /> {/* Add route for Admin */}
+            <Admin />
           </Route>
           <Route path="/">
+            <Home />
+          </Route>
+          <Route path="/*">
             <Home />
           </Route>
         </Switch>

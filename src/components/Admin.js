@@ -5,42 +5,31 @@ import { CONTRACT_ADDRESS } from '../config';
 
 function Admin() {
   const [bids, setBids] = useState([]);
-  const [collateralTokens, setCollateralTokens] = useState([]);
-  const [newToken, setNewToken] = useState('');
-  const [approval, setApproval] = useState(false);
+  const [approvedTokens, setApprovedTokens] = useState([]);
+  const [tokenAddress, setTokenAddress] = useState('');
+  const [approvalStatus, setApprovalStatus] = useState(true);
+  const [loans, setLoans] = useState([]);
 
   useEffect(() => {
-    fetchAllBids();
-    fetchCollateralTokens();
+    fetchApprovedTokens();
+    fetchAllLoans();
   }, []);
 
-  const fetchAllBids = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
-
-    try {
-      const allBids = []; // Replace this with your method to get all bids
-      // Assuming you have a way to get all loan IDs
-      const loanIds = await contract.getAllLoanIds();
-      for (let loanId of loanIds) {
-        const loanBids = await contract.getAllBidsForProposedLoan(loanId);
-        allBids.push(...loanBids);
-      }
-      setBids(allBids);
-    } catch (error) {
-      console.error(error);
-    }
+  const handleTokenInputChange = (e) => {
+    setTokenAddress(e.target.value);
   };
 
-  const fetchCollateralTokens = async () => {
+  const handleApprovalChange = (e) => {
+    setApprovalStatus(e.target.checked);
+  };
+
+  const fetchApprovedTokens = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
 
     try {
-      const tokens = []; // Replace this with your method to get approved tokens
-      // Assuming you have a way to get all tokens
-      const tokenList = await contract.getApprovedTokens();
-      setCollateralTokens(tokenList);
+      const approvedTokensList = []; // Fetch and populate this list
+      setApprovedTokens(approvedTokensList);
     } catch (error) {
       console.error(error);
     }
@@ -55,73 +44,98 @@ function Admin() {
     const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
 
     try {
-      const tx = await contract.approvedOrDenyCollateralToken(newToken, approval);
+      const tx = await contract.approvedOrDenyCollateralToken(tokenAddress, approvalStatus);
       await tx.wait();
       alert('Collateral token updated successfully!');
-      fetchCollateralTokens(); // Refresh the list of tokens
+      fetchApprovedTokens();
     } catch (error) {
       console.error(error);
       alert('An error occurred while updating the collateral token.');
     }
   };
 
+  const fetchBids = async (loanId) => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
+
+    try {
+      const fetchedBids = await contract.getAllBidsForProposedLoan(loanId);
+      setBids(fetchedBids);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchAllLoans = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
+
+    try {
+      const totalLoans = await contract.totalNumberOfLoans();
+      const fetchedLoans = [];
+
+      for (let i = 0; i < totalLoans; i++) {
+        const loan = await contract.getLoan(i);
+        fetchedLoans.push(loan);
+      }
+
+      setLoans(fetchedLoans);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div>
-      <h2>Admin Page</h2>
+      <h1>Admin Page</h1>
       <div>
-        <h3>All Bids</h3>
-        {bids.length > 0 ? (
-          bids.map((bid, index) => (
-            <div key={index}>
-              <p>Lender: {bid.lender}</p>
-              <p>APR Offer: {bid.APRoffer}</p>
-              <p>Loan ID: {bid.loanId}</p>
-              <p>Accepted: {bid.accepted ? 'Yes' : 'No'}</p>
-            </div>
-          ))
-        ) : (
-          <p>No bids available</p>
-        )}
-      </div>
-      <div>
-        <h3>Approved Collateral Tokens</h3>
-        {collateralTokens.length > 0 ? (
-          collateralTokens.map((token, index) => (
-            <div key={index}>
-              <p>Token Address: {token}</p>
-            </div>
-          ))
-        ) : (
-          <p>No collateral tokens available</p>
-        )}
-      </div>
-      <div>
-        <h3>Update Collateral Token</h3>
+        <h2>Update Collateral Token</h2>
         <input
           type="text"
+          value={tokenAddress}
+          onChange={handleTokenInputChange}
           placeholder="Token Address"
-          value={newToken}
-          onChange={(e) => setNewToken(e.target.value)}
         />
         <label>
+          <input
+            type="checkbox"
+            checked={approvalStatus}
+            onChange={handleApprovalChange}
+          />
           Approve
-          <input
-            type="radio"
-            name="approval"
-            checked={approval === true}
-            onChange={() => setApproval(true)}
-          />
-        </label>
-        <label>
-          Deny
-          <input
-            type="radio"
-            name="approval"
-            checked={approval === false}
-            onChange={() => setApproval(false)}
-          />
         </label>
         <button onClick={updateCollateralToken}>Update Token</button>
+      </div>
+      <div>
+        <h2>Approved Tokens</h2>
+        <ul>
+          {approvedTokens.map((token, index) => (
+            <li key={index}>{token}</li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h2>All Loans</h2>
+        {loans.length > 0 ? (
+          <ul>
+            {loans.map((loan, index) => (
+              <li key={index}>
+                <p>Loan ID: {loan.loanId.toString()}</p>
+                <p>Borrower: {loan.borrower}</p>
+                <p>Amount: {loan.amount.toString()}</p>
+                <p>Duration: {loan.duration.toString()} seconds</p>
+                <p>Collateral Token: {loan.collateralToken}</p>
+                <p>Collateral Amount: {loan.collateralAmount.toString()}</p>
+                <p>Loan Status: {loan.loanStatus}</p>
+                <p>Bid ID: {loan.bid.bidId.toString()}</p>
+                <p>Bid APR Offer: {loan.bid.APRoffer.toString()}</p>
+                <button onClick={() => fetchBids(loan.loanId.toString())}>View Bids</button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No loans available.</p>
+        )}
       </div>
     </div>
   );

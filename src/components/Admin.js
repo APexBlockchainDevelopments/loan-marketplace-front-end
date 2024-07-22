@@ -10,6 +10,9 @@ function Admin() {
   const [approvalStatus, setApprovalStatus] = useState(true);
   const [loans, setLoans] = useState([]);
 
+
+  ///need to re config, need to update contract address
+
   useEffect(() => {
     fetchApprovedTokens();
     fetchAllLoans();

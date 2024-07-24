@@ -61,6 +61,25 @@ export const abi = [
     },
     {
         "type": "function",
+        "name": "calculatePlatformFees",
+        "inputs": [
+            {
+                "name": "_collateralAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "pure"
+    },
+    {
+        "type": "function",
         "name": "checkIfTokenIsApprovedForCollateral",
         "inputs": [
             {
@@ -84,6 +103,24 @@ export const abi = [
         "inputs": [
             {
                 "name": "_loanId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "claimERC20",
+        "inputs": [
+            {
+                "name": "_token",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "_amount",
                 "type": "uint256",
                 "internalType": "uint256"
             }
@@ -233,6 +270,25 @@ export const abi = [
     },
     {
         "type": "function",
+        "name": "getAllLoansBasedOnBorrower",
+        "inputs": [
+            {
+                "name": "_borrower",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256[]",
+                "internalType": "uint256[]"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
         "name": "getBid",
         "inputs": [
             {
@@ -283,6 +339,25 @@ export const abi = [
                         "internalType": "bool"
                     }
                 ]
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getBids",
+        "inputs": [
+            {
+                "name": "lender",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256[2][]",
+                "internalType": "uint256[2][]"
             }
         ],
         "stateMutability": "view"
